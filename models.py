@@ -34,8 +34,17 @@ class Atividades(base):
     id = Column(Integer, primary_key=True)
     name = Column(String(80))
     pessoa_id = Column(Integer, ForeignKey('pessoas.id'))
-    pssoa = relationship('Pessoas')
+    pessoa = relationship('Pessoas')
+
+    def save(self):
+        db_session.add(self)
+        db_session.commit()
     
+    def delete(self):
+        db_session.delete(self)
+        db_session.commit()
+
+
 
 def init_db():
     base.metadata.create_all(bind=engine)

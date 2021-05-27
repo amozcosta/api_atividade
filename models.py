@@ -11,6 +11,23 @@ db_session = scoped_session(sessionmaker(autocommit=False, bind=engine))
 base = declarative_base()
 base.query = db_session.query_property()
 
+class Users(base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    username = Column(String(50), index=True, unique=True)
+    password = Column(String(50))
+    
+    def __repr__(self) -> str:
+        return f'<Users {self.username}>'
+    
+    def save(self):
+        db_session.add(self)
+        db_session.commit()
+    
+    def delete(self):
+        db_session.delete(self)
+        db_session.commit()
+
 class Pessoas(base):
     __tablename__ = 'pessoas'
     id = Column(Integer, primary_key=True)

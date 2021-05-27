@@ -1,11 +1,32 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
-from models import Pessoas, Atividades
+from models import Pessoas, Atividades, Users
+from flask_httpauth import HTTPBasicAuth
 
+
+auth = HTTPBasicAuth()
 app = Flask(__name__)
 api = Api(app)
 
+# users = {
+#     'fulano': 'senha',
+#     'juao': 'senha',
+# }
+
+# @auth.verify_password
+# def verify_auth(username, passwd):
+#     if not (username, passwd):
+#         return False
+#     return users.get(username) == passwd
+
+@auth.verify_password
+def verify_auth(username, password):
+    if not (username, password):
+        return False
+    return Users.query.filter_by(username=username, password=password).first()
 class Person(Resource):
+    
+    @auth.login_required
     def get(self, name):
         person = Pessoas.query.filter_by(name=name).first()
         try:
@@ -21,6 +42,7 @@ class Person(Resource):
             }
         return response
     
+    @auth.login_required
     def put(self, name):
         person = Pessoas.query.filter_by(name=name).first()
         data = request.json
@@ -37,6 +59,7 @@ class Person(Resource):
         }  
         return response
     
+    @auth.login_required
     def delete(self, name):
         person = Pessoas.query.filter_by(name=name).first()
         person.delete()
@@ -45,11 +68,14 @@ class Person(Resource):
 
 
 class Persons(Resource):
+    
+    @auth.login_required
     def get(self):
         persons = Pessoas.query.all()
         response = [{'id': i.id, 'name': i.name, 'age': i.age} for i in persons]
         return response
     
+    @auth.login_required
     def post(self):
         data = request.json
         person = Pessoas(name=data['name'], age=data['age'])
